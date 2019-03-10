@@ -1,0 +1,20 @@
+
+boundaries = lab03b.boundaries(binarizedImage)
+
+print(boundaries)
+
+left = boundaries.left
+right = boundaries.right
+top = boundaries.top
+bottom = boundaries.bottom
+
+
+centroid = lab03b.centroid(binarizedImage, boundaries)
+print(centroid)
+cx = centroid[0]
+cy = centroid[1]
+
+# boxes = [((left, top), (cx, cy)),
+#                  ((cx, top), (right, cy)),
+#                  ((left, cy), (cx, bottom)),
+#                  ((cx, cy), (right, bottom))]
