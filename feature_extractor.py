@@ -6,6 +6,7 @@ from methods import BOX
 import numpy as np
 import methods
 import os
+import math
 
 
 class FeatureExtractor:
@@ -18,9 +19,12 @@ class FeatureExtractor:
     draw = None
     binarizedImage = None
 
+    boxes = list()
+
     centroids = np.zeros((64, 2), np.int)
     ratios = np.zeros((64, 1), np.float)
     transitions = np.zeros((64, 1), np.int)
+    angles = np.zeros((64, 1), np.float)
 
     currBox = 0
 
@@ -48,13 +52,21 @@ class FeatureExtractor:
         if not os.path.exists('processed/ratios'):
             os.makedirs('processed/ratios')
 
-        print(self.centroids)
-        np.savetxt('processed/centroids/'+self.sig+'.txt', self.centroids,fmt = '%d')
+        if not os.path.exists('processed/angles'):
+            os.makedirs('processed/angles')
+
+        np.savetxt('processed/centroids/'+self.sig +
+                   '.txt', self.centroids, fmt='%d')
         np.savetxt('processed/transitions/'+self.sig+'.txt', self.transitions)
         np.savetxt('processed/ratios/'+self.sig+'.txt', self.ratios)
+        np.savetxt('processed/angles/'+self.sig+'.txt', self.angles)
+
+    '''
+    Recursive function to split the image into 64 cells
+    '''
 
     def split(self, image, thisBox, depth=0):
-        cx, cy = methods.centroid(self.binarizedImage, thisBox)
+        cx, cy = methods.centroid(image, thisBox)
         if depth < 3:
             self.split(image, BOX(thisBox.left, cx,
                                   thisBox.top, cy), depth + 1)
@@ -65,21 +77,25 @@ class FeatureExtractor:
             self.split(image, BOX(cx, thisBox.right,
                                   cy, thisBox.bottom), depth + 1)
 
-        else:
-            t = methods.transitions(image, thisBox)
-            r = self.findRatio(thisBox)
+        else:  # completely divided
+            # if the box is completely divided add it to the list
+            self.saveFeatures(image, thisBox, (cx, cy), self.currBox)
 
-            self.centroids[self.currBox][0] = cx
-            self.centroids[self.currBox][1] = cy
-            self.transitions[self.currBox][0] = t
-            self.ratios[self.currBox][0] = r
             self.currBox += 1
-            # self.centroids = np.append(self.centroids, [(cx, cy)])
-            # self.transitions = np.append(self.transitions, [t])
-            # self.ratios = np.append(self.ratios, [r])
-
             # self.draw.rectangle(((thisBox.left, thisBox.top),
             #                      (thisBox.right, thisBox.bottom)), outline="yellow")
 
-    def findRatio(self, box):
-        return (box.right-box.left)*1.00/(box.bottom-box.top)
+    def saveFeatures(self, image, thisBox, centroid, boxNo):
+        transitions = methods.transitions(image, thisBox)
+        ratio = methods.blackCount(image, thisBox)*1.0/thisBox.getTotalCount()
+
+        self.boxes.append(thisBox)
+        self.centroids[boxNo][0], self.centroids[boxNo][1] = centroid
+        self.transitions[boxNo][0] = transitions
+        self.ratios[boxNo][0] = ratio
+        self.angles[boxNo][0] = self.angle(centroid, thisBox)
+
+    def angle(self, centroid, thisBox):
+        p1 = centroid
+        p2 = thisBox.right, thisBox.bottom
+        return math.atan2(p1[1]-p2[1], p1[0] - p2[0])

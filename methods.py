@@ -1,5 +1,5 @@
 import itertools
-
+import math
 
 class BOX:
     left = None
@@ -12,7 +12,16 @@ class BOX:
         self.left = left
         self.top = top
         self.right = right
-
+    
+    def getSize(self):
+        return (self.right-self.left,
+                     self.bottom-self.top)
+    '''
+    Returns the total number of pixels
+    '''
+    def getTotalCount(self):
+        width,height = self.getSize()
+        return int(width * height)
     def __str__(self):
         return "<BOX left:%d bottom:%d top:%d right:%d>" % (self.left, self.bottom, self.top, self.right)
 
@@ -69,3 +78,13 @@ def boundaries(binarizedImage):
             if y < topp:
                 topp = y
     return BOX(leftt, rightt, topp, bottomm)
+
+
+def blackCount(image, box):
+    width, height = box.getSize()
+    n = 0
+    for x, y in itertools.product(range(width), range(height)):
+        curr = image.getpixel((box.left + x, box.top + y))
+        if curr == 0:
+            n = n + 1
+    return n

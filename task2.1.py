@@ -7,7 +7,7 @@ import numpy as np
 import methods
 import os
 
-sig = 'R0001'
+sig = 'R001'
 path = 'res'
 mime = '.png'
 
@@ -24,9 +24,9 @@ width, height = image.size
 
 draw = ImageDraw.Draw(image)
 
-centroids = np.zeros((0, 2), np.int)
-ratios = np.zeros((0, 1), np.int)
-transitions = np.zeros((0, 1), np.int)
+centroids =list()
+ratios = list()
+transitions = list()
 
 
 def findRatio(box):
@@ -47,9 +47,9 @@ def split(image, thisBox, depth=0):
         t = methods.transitions(image, thisBox)
         r = findRatio(thisBox)
         
-        centroids = np.append(centroids, [[cx, cy]])
-        transitions = np.append(transitions, [t])
-        ratios = np.append(ratios, [r])
+        centroids.append((cx, cy))
+        transitions.append(t)
+        ratios.append(r)
         # transitions[currentBox] = t
         # ratios[currentBox] = r
         # currentBox += 1
@@ -64,14 +64,6 @@ print(mainBox)
 split(binarizedImage, mainBox)
 
 
-if not os.path.exists('processed/centroids'):
-    os.makedirs('processed/centroids')
-
-if not os.path.exists('processed/transitions'):
-    os.makedirs('processed/transitions')
-
-if not os.path.exists('processed/ratios'):
-    os.makedirs('processed/ratios')
 
 
 np.savetxt('processed/centroids/'+sig+'.txt', centroids)
