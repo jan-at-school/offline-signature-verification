@@ -13,15 +13,14 @@ http://www.cedar.buffalo.edu/NIJ/data/signatures.rar
 '''
 
 
-
 allsigfiles = os.listdir('res')
 
-
+print(allsigfiles)
 
 for i in range(len(allsigfiles)):
-    if i != 0:
-        sig = "R{:03d}".format(i)
-        print(sig)
-        FeatureExtractor('res',sig,'.png').extract()
-    
+    sig = "R{:03d}".format(i)
+    print(sig)
 
+    filename, file_extension = os.path.splitext(allsigfiles[i])
+    if file_extension == '.png' or file_extension == '.jpg':
+        FeatureExtractor('res/'+ allsigfiles[i],sig, i).extract()

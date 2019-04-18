@@ -1,2 +1,7 @@
 /dataset
 /res
+/processed
+*.ini
+
+
+
