@@ -8,11 +8,12 @@ import methods
 from math import atan
 import os
 import math
+import storage
 
 
 class FeatureExtractor:
 
-    sig = None
+    sigNo = None
     path = None
     mime = None
 
@@ -34,56 +35,40 @@ class FeatureExtractor:
     currBox = 0
 
     config = {
-        'threshold': 200
+        'threshold': 188,
+        'outputPath': 'processed'
     }
 
-    def __init__(self, filePath, sig, mime, config=None):
+    def __init__(self, filePath, sigNo, config=None):
 
         self.config = config if not config == None else self.config
-        self.sig = sig
+        self.sigNo = sigNo
 
         self.path = os.path.dirname(filePath)
         filename, file_extension = os.path.splitext(filePath)
         self.mime = file_extension
         self.image = Image.open(filePath)
+        # half = 0.5
+        # self.image = self.image.resize( [int(half * s) for s in self.image.size] )
         # convert to singal channeled image
         self.binarizedImage = self.image.convert("L")
+        threshold = self.config.get('threshold')
         self.binarizedImage = self.binarizedImage.point(
-            lambda x: 0 if x < self.config.get('threshold') else 255, '1')  # binarized image
+            lambda x: 0 if x < threshold else 255, '1')  # binarized image
         self.draw = ImageDraw.Draw(self.binarizedImage)
+        # self.binarizedImage.show()
+
+    def extractAndSave(self):
+        self.extract()
+
+        storage.store(self.config.get('outputPath'), self.sigNo, self.centroids, self.transitions,
+                      self.ratios, self.angles, self.blacks, self.normalizedSize, self.normalizedSumOfAngles)
+
+        # self.binarizedImage.show()
 
     def extract(self):
         mainBox = methods.boundaries(self.binarizedImage)
         self.split(self.binarizedImage, mainBox)
-
-        if not os.path.exists('processed/centroids'):
-            os.makedirs('processed/centroids')
-        if not os.path.exists('processed/transitions'):
-            os.makedirs('processed/transitions')
-        if not os.path.exists('processed/ratios'):
-            os.makedirs('processed/ratios')
-        if not os.path.exists('processed/angles'):
-            os.makedirs('processed/angles')
-        if not os.path.exists('processed/blacks'):
-            os.makedirs('processed/blacks')
-        if not os.path.exists('processed/normalizedSize'):
-            os.makedirs('processed/normalizedSize')
-        if not os.path.exists('processed/normalizedSumOfAngles'):
-            os.makedirs('processed/normalizedSumOfAngles')
-
-        np.savetxt('processed/centroids/'+self.sig +
-                   '.txt', self.centroids, fmt='%d')
-        np.savetxt('processed/transitions/'+self.sig+'.txt', self.transitions)
-        np.savetxt('processed/ratios/'+self.sig+'.txt', self.ratios)
-        np.savetxt('processed/angles/'+self.sig+'.txt', self.angles)
-        np.savetxt('processed/blacks/'+self.sig+'.txt', self.blacks, fmt='%d')
-        np.savetxt('processed/normalizedSize/' +
-                   self.sig+'.txt', self.normalizedSize)
-        np.savetxt('processed/normalizedSumOfAngles/' +
-                   self.sig+'.txt', self.normalizedSumOfAngles)
-
-        # self.binarizedImage.show()
-
     '''
     Recursive function to split the image into 64 cells
     '''
@@ -106,7 +91,7 @@ class FeatureExtractor:
             try:
                 self.saveFeatures(image, thisBox, (cx, cy), self.currBox)
             except Exception as e:
-                self.binarizedImage.show()
+                print(e)
 
             self.currBox += 1
             self.draw.rectangle(((thisBox.left, thisBox.top),

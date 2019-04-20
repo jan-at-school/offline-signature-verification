@@ -82,8 +82,6 @@ def blackFeatures(image, box):
 
 
 
-
-
 def boundaries(binarizedImage):
 
     width, height = binarizedImage.size

@@ -6,21 +6,28 @@ from feature_extractor import FeatureExtractor
 import numpy as np
 import methods
 import os
-
+import storage
 '''
 data set
 http://www.cedar.buffalo.edu/NIJ/data/signatures.rar
 '''
 
 
-allsigfiles = os.listdir('res')
+inputFilesPath = 'res'
+allsigfiles = os.listdir(inputFilesPath)
 
+totalSigs = len(allsigfiles)
 print(allsigfiles)
+print(totalSigs)
+for i, file in enumerate(allsigfiles):
+    print(i, 'out if', totalSigs)
+    filename, file_extension = os.path.splitext(file)
 
-for i in range(len(allsigfiles)):
-    sig = "R{:03d}".format(i)
-    print(sig)
-
-    filename, file_extension = os.path.splitext(allsigfiles[i])
     if file_extension == '.png' or file_extension == '.jpg':
-        FeatureExtractor('res/'+ allsigfiles[i],sig, i).extract()
+        print(file)
+        FeatureExtractor(inputFilesPath+'/'+file, sigNo=i).extractAndSave()
+
+
+centroids = storage.get('processed', 1, 'ratios')
+
+print(centroids)
