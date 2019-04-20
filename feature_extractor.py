@@ -9,10 +9,35 @@ from math import atan
 import os
 import math
 import storage
+from threading import Thread
+from multiprocessing import Process, Lock
+
+
+mutex = Lock()
+
+
+class FeatureExtractorThread(Thread):
+
+    featureExtractor = None
+    sigNo = None
+    totalSigs = None
+
+    def __init__(self, filePath, groupNo, sigNo, progress, totalSigs, config=None):
+        ''' Constructor. '''
+        Thread.__init__(self)
+        self.featureExtractor = FeatureExtractor(
+            filePath, groupNo, sigNo, progress, config)
+        self.sigNo = sigNo
+        self.totalSigs = totalSigs
+
+    def run(self):
+        print(self.sigNo, 'out if', self.totalSigs)
+        self.featureExtractor.extractAndSave()
 
 
 class FeatureExtractor:
 
+    groupNo = None
     sigNo = None
     path = None
     mime = None
@@ -28,7 +53,6 @@ class FeatureExtractor:
     transitions = np.zeros((64, 1), np.int)
     angles = np.zeros((64, 1), np.float)
     blacks = np.zeros((64, 1), np.int)
-
     normalizedSize = np.zeros((64, 1), np.float)
     normalizedSumOfAngles = np.zeros((64, 1), np.float)
 
@@ -39,17 +63,19 @@ class FeatureExtractor:
         'outputPath': 'processed'
     }
 
-    def __init__(self, filePath, sigNo, config=None):
+    def __init__(self, filePath, groupNo, sigNo, overAllSigNo, config=None):
 
         self.config = config if not config == None else self.config
+        self.groupNo = groupNo
         self.sigNo = sigNo
 
         self.path = os.path.dirname(filePath)
         filename, file_extension = os.path.splitext(filePath)
         self.mime = file_extension
         self.image = Image.open(filePath)
-        # half = 0.5
-        # self.image = self.image.resize( [int(half * s) for s in self.image.size] )
+        half = 0.5
+        self.image = self.image.resize(
+            [int(half * s) for s in self.image.size])
         # convert to singal channeled image
         self.binarizedImage = self.image.convert("L")
         threshold = self.config.get('threshold')
@@ -61,14 +87,18 @@ class FeatureExtractor:
     def extractAndSave(self):
         self.extract()
 
-        storage.store(self.config.get('outputPath'), self.sigNo, self.centroids, self.transitions,
+        storage.store(self.config.get('outputPath'), self.groupNo, self.sigNo, self.centroids, self.transitions,
                       self.ratios, self.angles, self.blacks, self.normalizedSize, self.normalizedSumOfAngles)
 
+        print('Completed', self.overAllSigNo)
         # self.binarizedImage.show()
 
     def extract(self):
         mainBox = methods.boundaries(self.binarizedImage)
+        self.draw.rectangle(((mainBox.left, mainBox.top),
+                             (mainBox.right, mainBox.bottom)), outline="black")
         self.split(self.binarizedImage, mainBox)
+
     '''
     Recursive function to split the image into 64 cells
     '''
@@ -110,7 +140,7 @@ class FeatureExtractor:
         self.angles[boxNo][0] = self.angle(centroid, thisBox)
 
         if zeroBox:
-            self.binarizedImage.show()
+            # self.binarizedImage.show()
             self.ratios[boxNo][0] = 0
             self.normalizedSize[boxNo][0] = 0.5
         else:
@@ -124,3 +154,5 @@ class FeatureExtractor:
         p1 = centroid
         p2 = thisBox.right, thisBox.bottom
         return math.atan2(p1[1]-p2[1], p1[0] - p2[0])
+
+    

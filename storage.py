@@ -4,7 +4,7 @@ import os
 import numpy as np
 
 
-def store(path, sigNo, centroids=None, transitions=None, ratios=None, angles=None, blacks=None, normalizedSize=None, normalizedSumOfAngles=None):
+def store(path,groupNo, sigNo, centroids=None, transitions=None, ratios=None, angles=None, blacks=None, normalizedSize=None, normalizedSumOfAngles=None):
 
 
     if not os.path.exists(path + '/centroids'):
@@ -23,20 +23,26 @@ def store(path, sigNo, centroids=None, transitions=None, ratios=None, angles=Non
         os.makedirs(path + '/normalizedSumOfAngles')
 
     np.savetxt(path + '/centroids/' +
-               sigNoToFileName(sigNo), centroids, fmt='%d')
-    np.savetxt(path + '/transitions/'+sigNoToFileName(sigNo), transitions)
-    np.savetxt(path + '/ratios/'+sigNoToFileName(sigNo), ratios)
-    np.savetxt(path + '/angles/'+sigNoToFileName(sigNo), angles)
-    np.savetxt(path + '/blacks/'+sigNoToFileName(sigNo), blacks, fmt='%d')
+               sigNoToFileName(groupNo,sigNo), centroids, fmt='%d')
+    np.savetxt(path + '/transitions/'+sigNoToFileName(groupNo,sigNo), transitions)
+    np.savetxt(path + '/ratios/'+sigNoToFileName(groupNo,sigNo), ratios)
+    np.savetxt(path + '/angles/'+sigNoToFileName(groupNo,sigNo), angles)
+    np.savetxt(path + '/blacks/'+sigNoToFileName(groupNo,sigNo), blacks, fmt='%d')
     np.savetxt(path + '/normalizedSize/' +
-               sigNoToFileName(sigNo), normalizedSize)
+               sigNoToFileName(groupNo,sigNo), normalizedSize)
     np.savetxt(path + '/normalizedSumOfAngles/' +
-               sigNoToFileName(sigNo), normalizedSumOfAngles)
+               sigNoToFileName(groupNo,sigNo), normalizedSumOfAngles)
 
 
-def get(path, sigNo, feature):
-    return np.genfromtxt(path + '/' + feature + '/' + sigNoToFileName(sigNo))
 
 
-def sigNoToFileName(sigNo):
-    return "R{:03d}".format(sigNo)
+def get(path,groupNo, sigNo, feature):
+    return np.genfromtxt(path + '/' + feature + '/' + sigNoToFileName(groupNo,sigNo))
+
+
+def get(path,groupNo, sigNo, feature):
+    return np.genfromtxt(path + '/' + feature + '/' + sigNoToFileName(groupNo,sigNo))
+
+
+def sigNoToFileName(group,sigNo):
+    return '{group}_{sigNo}'.format(group=group, sigNo=sigNo)

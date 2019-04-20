@@ -8,7 +8,7 @@ import methods
 from math import atan
 import os
 import math
-from feature_extractor import FeatureExtractor
+import feature_extractor
 import storage
 
 
@@ -19,9 +19,15 @@ resFilePath = 'res'
 inputFiles = os.listdir(resFilePath)
 totalSigs = len(os.listdir('processed/centroids'))
 
-refResult = FeatureExtractor(, None).extract()
+questionedSig = 'data/test/forgeries_{person}_{signNo}'.format(person=1, signNo=5)
+
+
+refResult = feature_extractor.FeatureExtractor(questionedSig,None,None,None).extract()
+
+
+
 
 
 
 for i in range(totalSigs):
-    if(i == )
+    if(i ==)
