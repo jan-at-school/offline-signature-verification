@@ -17,7 +17,10 @@ http://www.cedar.buffalo.edu/NIJ/data/signatures.rar
 '''
 
 
-inputFilesPath = 'res'
+NO_OF_THREADS = 100
+
+inputFilesPath = storage.DATASET_PATH + '/TestSet/Questioned'
+# inputFilesPath = 'res'
 allsigfiles = os.listdir(inputFilesPath)
 totalSigs = len(allsigfiles)
 print(allsigfiles)
@@ -25,29 +28,41 @@ print(totalSigs)
 
 threads = list()
 
+startTime = time.time()
 
 for i, file in enumerate(allsigfiles):
     filename, file_extension = os.path.splitext(file)
 
     if file_extension == '.png' or file_extension == '.jpg':
         print(filename)
-        
-        groupNo,sigNo = re.findall('\d+',filename) 
+
+        sigNo = re.findall('\d+', filename)
+        sigNo = int(sigNo[0])
         #  filePath, groupNo, sigNo, progress, totalSigs
-        threads.append(feature_extractor.FeatureExtractorThread(inputFilesPath+'/'+file,groupNo,sigNo, i, totalSigs))
 
-print('Starting Threads')
-
-for thread in threads:
-    while threading.active_count() > 150:
-        time.sleep(5)
-    thread.start()
-
-# wait for all of them to complete
-for thread in threads:
-    thread.join()
+        if NO_OF_THREADS > 1:
+            threads.append(feature_extractor.FeatureExtractorThread(
+                inputFilesPath+'/'+file, sigNo, totalSigs))
+        else:
+            feature_extractor.FeatureExtractor(
+                inputFilesPath+'/'+file, sigNo).extractAndSave()
 
 
-centroids = storage.get(1, 10, 'ratios')
+if NO_OF_THREADS > 1:
+    print('Starting Threads')
+    for thread in threads:
+        while threading.active_count() > NO_OF_THREADS:
+            time.sleep(1)
+        thread.start()
 
-print(centroids)
+    # wait for all of them to complete
+    for thread in threads:
+        thread.join()
+
+
+alll = storage.getAllProcessed()
+
+# print(alll)
+
+
+print(time.time() - startTime)
