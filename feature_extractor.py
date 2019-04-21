@@ -35,10 +35,34 @@ class FeatureExtractorThread(Thread):
         self.featureExtractor.extractAndSave()
 
 
+class SigFeatures:
+
+
+    groupNo = None
+    sigNo = None
+
+    centroids = np.zeros((64, 2), np.int)
+    ratios = np.zeros(64, np.float)
+    transitions = np.zeros(64, np.int)
+    angles = np.zeros(64, np.float)
+    blacks = np.zeros(64, np.int)
+    normalizedSize = np.zeros(64, np.float)
+    normalizedSumOfAngles = np.zeros(64, np.float)
+
+
+    def __init__(self,groupNo,sigNo):
+        self.groupNo = groupNo
+        self.sigNo = sigNo
+        self.centroids = self.centroids
+        
+
+
+
 class FeatureExtractor:
 
     groupNo = None
     sigNo = None
+    overAllSigNo = None
     path = None
     mime = None
 
@@ -48,13 +72,9 @@ class FeatureExtractor:
 
     boxes = list()
 
-    centroids = np.zeros((64, 2), np.int)
-    ratios = np.zeros((64, 1), np.float)
-    transitions = np.zeros((64, 1), np.int)
-    angles = np.zeros((64, 1), np.float)
-    blacks = np.zeros((64, 1), np.int)
-    normalizedSize = np.zeros((64, 1), np.float)
-    normalizedSumOfAngles = np.zeros((64, 1), np.float)
+
+    sigFeatures = None
+    
 
     currBox = 0
 
@@ -68,6 +88,8 @@ class FeatureExtractor:
         self.config = config if not config == None else self.config
         self.groupNo = groupNo
         self.sigNo = sigNo
+        self.overAllSigNo = overAllSigNo
+        self.sigFeatures = SigFeatures(groupNo,sigNo)
 
         self.path = os.path.dirname(filePath)
         filename, file_extension = os.path.splitext(filePath)
@@ -87,8 +109,7 @@ class FeatureExtractor:
     def extractAndSave(self):
         self.extract()
 
-        storage.store(self.config.get('outputPath'), self.groupNo, self.sigNo, self.centroids, self.transitions,
-                      self.ratios, self.angles, self.blacks, self.normalizedSize, self.normalizedSumOfAngles)
+        storage.store(self.config.get('outputPath'), self.groupNo, self.sigNo, self.sigFeatures)
 
         print('Completed', self.overAllSigNo)
         # self.binarizedImage.show()
@@ -98,6 +119,7 @@ class FeatureExtractor:
         self.draw.rectangle(((mainBox.left, mainBox.top),
                              (mainBox.right, mainBox.bottom)), outline="black")
         self.split(self.binarizedImage, mainBox)
+        return self.sigFeatures
 
     '''
     Recursive function to split the image into 64 cells
@@ -134,21 +156,21 @@ class FeatureExtractor:
         zeroBox = thisBox.isZeroBox()
 
         self.boxes.append(thisBox)
-        self.centroids[boxNo][0], self.centroids[boxNo][1] = centroid
-        self.transitions[boxNo][0] = transitions
-        self.blacks[boxNo][0] = blacks
-        self.angles[boxNo][0] = self.angle(centroid, thisBox)
+        self.sigFeatures.centroids[boxNo][0], self.sigFeatures.centroids[boxNo][1] = centroid
+        self.sigFeatures.transitions[boxNo] = transitions
+        self.sigFeatures.blacks[boxNo] = blacks
+        self.sigFeatures.angles[boxNo] = self.angle(centroid, thisBox)
 
         if zeroBox:
             # self.binarizedImage.show()
-            self.ratios[boxNo][0] = 0
-            self.normalizedSize[boxNo][0] = 0.5
+            self.sigFeatures.ratios[boxNo] = 0
+            self.sigFeatures.normalizedSize[boxNo] = 0.5
         else:
-            self.normalizedSize[boxNo][0] = float(
+            self.sigFeatures.normalizedSize[boxNo] = float(
                 blacks)/float(thisBox.getTotalPixels())
-            self.ratios[boxNo][0] = thisBox.getAspectRatio()
+            self.sigFeatures.ratios[boxNo] = thisBox.getAspectRatio()
 
-        self.normalizedSumOfAngles[boxNo][0] = blackAngleSum
+        self.sigFeatures.normalizedSumOfAngles[boxNo] = blackAngleSum
 
     def angle(self, centroid, thisBox):
         p1 = centroid
