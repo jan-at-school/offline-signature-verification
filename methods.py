@@ -109,28 +109,28 @@ def onetoonedist(array1,array2):
 
 
 
-# def eclideanDist(array1,array2):
-#     summ = 0 
-#     for i in range(len(array1)):
-#         summ += math.pow(array2[i] - array1[1],2)
+def eclideanDist(array1,array2):
+    summ = 0 
+    for i in range(len(array1)):
+        summ += math.pow(array2[i] - array1[1],2)
 
-#     return math.sqrt(summ)
-
-
-
-# def eclideanDistForCentroids(array1,array2):
-#     summ = 0 
-#     for i in range(len(array1)):
-#         cx = array1[i][0]
-#         cy = array1[i][1]
-
-#         refMagnitude = math.sqrt(cx*cx + cy*cy)
-
-#         tcx = array2[i][0]
-#         tcy = array2[i][1]    
-#         testMagnitude = math.sqrt(tcx*tcx + tcy*tcy)
+    return math.sqrt(summ)
 
 
-#         summ += math.pow((testMagnitude - refMagnitude),2)
 
-#     return math.sqrt(summ)
+def eclideanDistForCentroids(array1,array2):
+    summ = 0 
+    for i in range(len(array1)):
+        cx = array1[i][0]
+        cy = array1[i][1]
+
+        refMagnitude = math.sqrt(cx*cx + cy*cy)
+
+        tcx = array2[i][0]
+        tcy = array2[i][1]    
+        testMagnitude = math.sqrt(tcx*tcx + tcy*tcy)
+
+
+        summ += math.pow((testMagnitude - refMagnitude),2)
+
+    return math.sqrt(summ)

@@ -17,7 +17,7 @@ http://www.cedar.buffalo.edu/NIJ/data/signatures.rar
 '''
 
 
-NO_OF_THREADS = 100
+NO_OF_THREADS = 50
 
 inputFilesPath = storage.DATASET_PATH + '/TestSet/Questioned'
 # inputFilesPath = 'res'

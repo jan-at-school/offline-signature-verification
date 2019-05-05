@@ -31,7 +31,7 @@ def store(path, sigNo, sigFeatures):
     np.savetxt(path + '/centroids/' +
                sigNoToFileName(sigNo), sigFeatures.centroids, fmt='%d')
     np.savetxt(path + '/transitions/'+sigNoToFileName(sigNo),
-               sigFeatures.transitions)
+               sigFeatures.transitions, fmt='%d')
     np.savetxt(path + '/ratios/'+sigNoToFileName(sigNo), sigFeatures.ratios)
     np.savetxt(path + '/angles/'+sigNoToFileName(sigNo), sigFeatures.angles)
     np.savetxt(path + '/blacks/'+sigNoToFileName(sigNo),
