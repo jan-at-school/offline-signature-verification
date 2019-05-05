@@ -101,12 +101,10 @@ def savePlot(f1, f2, colors):
     print('sizes',len(x),len(y))
     plt.scatter(x, y, None, colors)
     
+    plt.savefig('featurePlots/{f1}_{f2}.jpg'.format(f1=f1.get('name'),f2=f2.get('name')))
+    plt.clf()
 
-    plt.savefig('featurePlots/{f1}_{f2}.png'.format(f1=f1.get('name'),f2=f2.get('name')))
-    
 
-
-    # genuine sig 49 52 66
 
 
 for f1, f2 in itertools.product(featureVectors.keys(), featureVectors.keys()):
