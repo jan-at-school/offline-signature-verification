@@ -99,9 +99,9 @@ class FeatureExtractor:
         filename, file_extension = os.path.splitext(filePath)
         self.mime = file_extension
         self.image = Image.open(filePath)
-        # half = 0.5
-        # self.image = self.image.resize(
-        #     [int(half * s) for s in self.image.size])
+        half = 0.5
+        self.image = self.image.resize(
+            [int(half * s) for s in self.image.size])
         # convert to singal channeled image
         self.binarizedImage = self.image.convert("L")
         threshold = self.config.get('threshold')
